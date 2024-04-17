@@ -1,0 +1,33 @@
+<html>
+  <head>
+    <title>Dynamic Registration</title>
+  </head>
+  <body>
+    <div>Input custom parameters:</div>
+    <div><textarea id="customParameters" rows="10" cols="50"></textarea></div>
+    <div><button id="register" type="button">Register</button></div>
+    <script>
+      async function register(event) {
+        const openIdConfig = 'OPENID_CONFIGURATION';
+        const registrationToken = 'REGISTRATION_TOKEN';
+        event.preventDefault();
+        const customParameters = document.getElementById('customParameters').value;
+        const customParamsParsed = Object.fromEntries(
+          customParameters.split('\n').map(line => line.split('='))
+        )
+        const response = await fetch(
+          `/register?openid_configuration=${openIdConfig}&registration_token=${registrationToken}`, {
+          method: 'POST',
+          headers: {
+            'Content-Type': 'application/json',
+          },
+          body: JSON.stringify({ customParameters: customParamsParsed }),
+        });
+        const data = await response.json();
+        console.log(data.message);
+        (window.opener || window.parent).postMessage({subject:"org.imsglobal.lti.close"}, "*");
+      }
+      document.getElementById('register').addEventListener('click', register);
+    </script>
+  </body>
+</html>
